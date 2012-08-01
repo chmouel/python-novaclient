@@ -37,11 +37,20 @@ from novaclient import service_catalog
 from novaclient import utils
 
 
+def get_auth_system_url(auth_system):
+    """Load plugin-based auth_url"""
+    ep_name = 'openstack.client.auth_url'
+    for ep in pkg_resources.iter_entry_points(ep_name):
+        if ep.name == auth_system:
+            return ep.load()()
+    return None
+
+
 class HTTPClient(httplib2.Http):
 
     USER_AGENT = 'python-novaclient'
 
-    def __init__(self, user, password, projectid, auth_url, insecure=False,
+    def __init__(self, user, password, projectid, auth_url=None, insecure=False,
                  timeout=None, proxy_tenant_id=None,
                  proxy_token=None, region_name=None,
                  endpoint_type='publicURL', service_type=None,
@@ -52,6 +61,8 @@ class HTTPClient(httplib2.Http):
         self.user = user
         self.password = password
         self.projectid = projectid
+        if not auth_url and auth_system and auth_system != 'keystone':
+            auth_url = get_auth_system_url(auth_system)
         self.auth_url = auth_url.rstrip('/')
         self.version = 'v1.1'
         self.region_name = region_name

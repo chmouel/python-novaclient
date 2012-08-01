@@ -366,10 +366,18 @@ class OpenStackComputeShell(object):
 
             if not os_auth_url:
                 if not url:
-                    raise exc.CommandError("You must provide an auth url "
-                            "via either --os_auth_url or env[OS_AUTH_URL]")
+                    if os_auth_system and os_auth_system != 'keystone':
+                        os_auth_url = \
+                            client.get_auth_system_url(os_auth_system)
                 else:
                     os_auth_url = url
+
+            if not os_auth_url:
+                    raise exc.CommandError("You must provide an auth url "
+                            "via either --os_auth_url or env[OS_AUTH_URL] "
+                            "or specify an auth_system which defines a "
+                            "default url with --os_auth_system "
+                            "or env[OS_AUTH_SYSTEM")
 
             if not os_region_name and region_name:
                 os_region_name = region_name
