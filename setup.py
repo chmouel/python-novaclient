@@ -47,8 +47,5 @@ setuptools.setup(
     ],
     entry_points={
         "console_scripts": ["nova = novaclient.shell:main"],
-        "openstack.client.authenticate": [
-          "rackspace = novaclient.plugins.rackspace:authenticate"
-          ]
     }
 )
