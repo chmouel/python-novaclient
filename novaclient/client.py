@@ -46,7 +46,7 @@ class HTTPClient(httplib2.Http):
                  endpoint_type='publicURL', service_type=None,
                  service_name=None, volume_service_name=None,
                  timings=False, bypass_url=None, no_cache=False,
-                 http_log_debug=False):
+                 http_log_debug=False, auth_system='keystone'):
         super(HTTPClient, self).__init__(timeout=timeout)
         self.user = user
         self.password = password
@@ -74,6 +74,8 @@ class HTTPClient(httplib2.Http):
         # httplib2 overrides
         self.force_exception_to_status_code = True
         self.disable_ssl_certificate_validation = insecure
+
+        self.auth_system = auth_system
 
         self._logger = logging.getLogger(__name__)
         if self.http_log_debug:
@@ -291,9 +293,14 @@ class HTTPClient(httplib2.Http):
         auth_url = self.auth_url
         if self.version == "v2.0":  # FIXME(chris): This should be better.
             while auth_url:
-                auth_url = self._v2_auth(auth_url)
+                if not self.auth_system or self.auth_system == 'keystone':
+                    auth_url = self._v2_auth(auth_url)
+                else:
+                    auth_plug_prefix = "openstack_client_auth_"
+                    plugin = __import__(auth_plug_prefix + self.auth_system)
+                    auth_url = plugin.authenticate(self)
 
-            # Are we acting on behalf of another user via an
+            # are we acting on behalf of another user via an
             # existing token? If so, our actual endpoints may
             # be different than that of the admin token.
             if self.proxy_token:

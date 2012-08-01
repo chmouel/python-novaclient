@@ -116,6 +116,11 @@ class OpenStackComputeShell(object):
             default=utils.env('OS_REGION_NAME', 'NOVA_REGION_NAME'),
             help='Defaults to env[OS_REGION_NAME].')
 
+        # alias for --os_region_name, left in for backwards compatibility
+        parser.add_argument('--os_auth_system',
+            default=utils.env('OS_AUTH_SYSTEM'),
+            help='Defaults to env[OS_AUTH_SYSTEM].')
+
         parser.add_argument('--service_type',
             help='Defaults to compute for most actions')
 
@@ -312,16 +317,16 @@ class OpenStackComputeShell(object):
             return 0
 
         (os_username, os_password, os_tenant_name, os_auth_url,
-                os_region_name, endpoint_type, insecure,
+                os_region_name, os_auth_system, endpoint_type, insecure,
                 service_type, service_name, volume_service_name,
                 username, apikey, projectid, url, region_name,
                 bypass_url, no_cache) = (
                         args.os_username, args.os_password,
                         args.os_tenant_name, args.os_auth_url,
-                        args.os_region_name, args.endpoint_type,
-                        args.insecure, args.service_type, args.service_name,
-                        args.volume_service_name, args.username,
-                        args.apikey, args.projectid,
+                        args.os_region_name, args.os_auth_system,
+                        args.endpoint_type, args.insecure, args.service_type,
+                        args.service_name, args.volume_service_name,
+                        args.username, args.apikey, args.projectid,
                         args.url, args.region_name,
                         args.bypass_url, args.no_cache)
 
@@ -383,7 +388,7 @@ class OpenStackComputeShell(object):
                 os_password, os_tenant_name, os_auth_url, insecure,
                 region_name=os_region_name, endpoint_type=endpoint_type,
                 extensions=self.extensions, service_type=service_type,
-                service_name=service_name,
+                service_name=service_name, auth_system=os_auth_system,
                 volume_service_name=volume_service_name,
                 timings=args.timings, bypass_url=bypass_url,
                 no_cache=no_cache, http_log_debug=options.debug)
