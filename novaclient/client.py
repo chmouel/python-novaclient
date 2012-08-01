@@ -20,6 +20,7 @@ import logging
 import os
 import time
 import urlparse
+import pkg_resources
 
 try:
     import json
@@ -296,9 +297,7 @@ class HTTPClient(httplib2.Http):
                 if not self.auth_system or self.auth_system == 'keystone':
                     auth_url = self._v2_auth(auth_url)
                 else:
-                    auth_plug_prefix = "openstack_client_auth_"
-                    plugin = __import__(auth_plug_prefix + self.auth_system)
-                    auth_url = plugin.authenticate(self)
+                    auth_url = self._plugin_auth(auth_url)
 
             # are we acting on behalf of another user via an
             # existing token? If so, our actual endpoints may
@@ -356,6 +355,14 @@ class HTTPClient(httplib2.Http):
             return resp['location']
         else:
             raise exceptions.from_response(resp, body)
+
+    def _plugin_auth(self, auth_url):
+        """Load plugin-based authentication"""
+        ep_name = 'openstack.client.authenticate'
+        for ep in pkg_resources.iter_entry_points(ep_name):
+            if ep.name == self.auth_system:
+                return plugin.load()(self, auth_url)
+        return None
 
     def _v2_auth(self, url):
         """Authenticate against a v2.0 auth service."""
