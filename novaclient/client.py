@@ -361,7 +361,7 @@ class HTTPClient(httplib2.Http):
         ep_name = 'openstack.client.authenticate'
         for ep in pkg_resources.iter_entry_points(ep_name):
             if ep.name == self.auth_system:
-                return plugin.load()(self, auth_url)
+                return ep.load()(self, auth_url)
         return None
 
     def _v2_auth(self, url):

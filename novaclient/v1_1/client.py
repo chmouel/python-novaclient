@@ -41,7 +41,7 @@ class Client(object):
     """
 
     # FIXME(jesse): project_id isn't required to authenticate
-    def __init__(self, username, api_key, project_id, auth_url="",
+    def __init__(self, username, api_key, project_id, auth_url,
                   insecure=False, timeout=None, proxy_tenant_id=None,
                   proxy_token=None, region_name=None,
                   endpoint_type='publicURL', extensions=None,
