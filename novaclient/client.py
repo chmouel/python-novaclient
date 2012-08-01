@@ -291,6 +291,13 @@ class HTTPClient(httplib2.Http):
         admin_url = urlparse.urlunsplit(
                         (scheme, new_netloc, path, query, frag))
 
+        # FIXME(chmouel): This is to handle backward compatibiliy when
+        # we didn't had a plugins mechanism for the auth_system. This
+        # should be remoed in the future and have people move to
+        # OS_AUTH_SYSTEM=rackspace
+        if "NOVA_RAX_AUTH" in os.environ:
+            self.auth_system = "rackspace"
+
         auth_url = self.auth_url
         if self.version == "v2.0":  # FIXME(chris): This should be better.
             while auth_url:
